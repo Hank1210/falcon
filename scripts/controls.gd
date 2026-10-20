@@ -51,3 +51,27 @@ static func fire_pressed() -> bool:
 	var pressed := down and not _fire_was_down
 	_fire_was_down = down
 	return pressed
+
+
+static var _start_was_down := false
+static var _pause_was_down := false
+
+
+## Wahr nur im Frame, in dem Leertaste oder Enter gedrueckt wird.
+static func start_pressed() -> bool:
+	var down: bool
+	if _autoplay:
+		down = Engine.get_physics_frames() in [5, 6]
+	else:
+		down = Input.is_physical_key_pressed(KEY_SPACE) or Input.is_physical_key_pressed(KEY_ENTER)
+	var pressed := down and not _start_was_down
+	_start_was_down = down
+	return pressed
+
+
+## Wahr nur im Frame, in dem P oder Esc gedrueckt wird.
+static func pause_pressed() -> bool:
+	var down := not _autoplay and (Input.is_physical_key_pressed(KEY_P) or Input.is_physical_key_pressed(KEY_ESCAPE))
+	var pressed := down and not _pause_was_down
+	_pause_was_down = down
+	return pressed

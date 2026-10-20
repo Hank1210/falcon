@@ -2,6 +2,8 @@
 
 Status: Entwurf v0.1 · Datum: 2026-10-20
 
+**Fortschritt:** M0 bis M4 sind umgesetzt (Spielkern, Landen und Tanken, Bomben, Wellen, Titelbild, Game Over, Highscore, Pause). Offen: M5 (eigene Pixel-Grafik und Sound), M6 (Feinschliff, Export). Messwerte aus dem Original stehen noch aus (siehe ORIGINAL-RULES.md).
+
 ## 1. Ziel und Vision
 
 Ein spielbarer Nachbau des C64-Klassikers *Falcon Patrol* (ca. 1983/84), einem horizontal scrollenden Shoot-'em-up. Das Remake soll sich wie das Original anfühlen (direkte Steuerung, einfache, aber fordernde Wellen, Highscore-Jagd), aber auf aktuellen Geräten laufen.

@@ -72,6 +72,8 @@
 			100
 		],
 		"points_last": 200,
-		"start_lives": 3
+		"start_lives": 3,
+		"extra_life_at": 3000,
+		"game_over_time": 3.0
 	}
 }

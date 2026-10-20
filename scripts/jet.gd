@@ -127,6 +127,7 @@ func start_life(pad_center_x: float) -> void:
 	_ammo_progress = 0.0
 	locked = true
 	land()
+	position.x = roundf(screen_x)
 
 
 ## Tankt und rearmiert (nur im Stand auf einem Flugplatz). Gibt true zurueck,

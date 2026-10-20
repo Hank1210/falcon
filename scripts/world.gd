@@ -13,6 +13,7 @@ var ammo := 0
 var ammo_max := 1
 var radar_enemies: Array[float] = []
 var fuel := 0.0
+var hiscore := 0
 var fuel_max := 1.0
 
 var _features: Array[Dictionary] = []
@@ -112,27 +113,8 @@ func restore_pads() -> void:
 		_pad_alive[i] = true
 
 
-const DIGITS := {
-	"0": ["111", "101", "101", "101", "111"],
-	"1": ["010", "110", "010", "010", "111"],
-	"2": ["111", "001", "111", "100", "111"],
-	"3": ["111", "001", "111", "001", "111"],
-	"4": ["101", "101", "111", "001", "001"],
-	"5": ["111", "100", "111", "001", "111"],
-	"6": ["111", "100", "111", "101", "111"],
-	"7": ["111", "001", "010", "010", "010"],
-	"8": ["111", "101", "111", "101", "111"],
-	"9": ["111", "101", "111", "001", "111"],
-}
-
-
 func _draw_digits(text: String, pos: Vector2, color: Color) -> void:
-	for i in text.length():
-		var rows: Array = DIGITS[text[i]]
-		for y in 5:
-			for x in 3:
-				if rows[y][x] == "1":
-					draw_rect(Rect2(pos.x + i * 4 + x, pos.y + y, 1, 1), color)
+	PixelFont.draw_text(self, text, pos, color)
 
 
 func _draw() -> void:
@@ -183,6 +165,7 @@ func _draw_hud() -> void:
 	draw_rect(view, C64.GREY, false)
 	_draw_speed_gauge(top)
 	_draw_digits("%05d" % score, Vector2(16, top + 26), C64.WHITE)
+	_draw_digits("HI %05d" % hiscore, Vector2(232, top + 26), C64.LIGHT_GREY)
 	for i in lives:
 		draw_rect(Rect2(232 + i * 10, top + 8, 8, 3), C64.WHITE)
 	var fuel_len := 36.0 * fuel / fuel_max

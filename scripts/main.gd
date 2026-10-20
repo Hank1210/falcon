@@ -1,20 +1,28 @@
 extends Node2D
 ## Spielablauf: Jet, Raketen, Feinde, Bomben, Landen/Tanken, Wellen, Punkte.
-## Game Over und Titelbild folgen in M4.
+## Zustaende: Titelbild, Spiel, Pause, Game Over, Namenseingabe (Bestenliste).
 
 const JET_TEXTURE := preload("res://assets/sprites/jet.png")
 const ENEMY_COLOR := C64.LIGHT_RED
 
 @onready var world: World = $World
 @onready var jet: Jet = $Jet
+@onready var overlay: Overlay = $Overlay
+
+enum State { TITLE, PLAYING, PAUSED, GAME_OVER, NAME_ENTRY }
 
 var enemies: Array[Enemy] = []
 var missiles: Array[Missile] = []
 var debris: Array[Debris] = []
 var explosions: Array[Explosion] = []
 
+var state := State.TITLE
 var score := 0
 var lives := 0
+var extra_life_given := false
+var gameover_left := 0.0
+var toast_left := 0.0
+var entry_name := ""
 var wave := 0  ## Nummer der aktuellen/naechsten Welle (0 = erste)
 var wave_kills := 0
 var wave_time := 0.0
@@ -28,16 +36,142 @@ var _rng := RandomNumberGenerator.new()
 
 func _ready() -> void:
 	_rng.seed = int(Params.val("world", "seed"))
+	Highscores.load_all()
 	lives = int(Params.val("score", "start_lives"))
-	world.restore_pads()
-	jet.start_life(world.pad_center(0))
-	wave_pause_left = Params.val("enemy", "first_wave_delay")
+	_to_title()
 	if OS.get_cmdline_user_args().has("--selftest"):
 		_selftest()
 
 
 func _physics_process(delta: float) -> void:
-	_step(delta)
+	_tick(delta)
+
+
+## Verteilt je nach Spielzustand. Start-/Pause-Tasten werden in jedem Zustand
+## abgefragt, damit die Flankenerkennung nie veraltet.
+func _tick(dt: float) -> void:
+	var start := Controls.start_pressed()
+	var pause := Controls.pause_pressed()
+	match state:
+		State.TITLE:
+			if start:
+				_start_game()
+			_update_view()
+		State.PLAYING:
+			if pause:
+				state = State.PAUSED
+				_update_view()
+			else:
+				_step(dt)
+		State.PAUSED:
+			if pause:
+				state = State.PLAYING
+			_update_view()
+		State.GAME_OVER:
+			_step_explosions(dt)
+			_update_view()
+			gameover_left -= dt
+			if gameover_left <= 0.0:
+				_after_game_over()
+		State.NAME_ENTRY:
+			_update_view()
+	_refresh_overlay()
+
+
+# --- Spielzustaende ---------------------------------------------------------
+
+func _to_title() -> void:
+	state = State.TITLE
+	_clear_hostiles()
+	wave_pause_left = 0.0
+	world.restore_pads()
+	jet.start_life(world.pad_center(0))
+	_update_view()
+
+
+func _start_game() -> void:
+	score = 0
+	lives = int(Params.val("score", "start_lives"))
+	extra_life_given = false
+	toast_left = 0.0
+	wave = 0
+	_clear_hostiles()
+	world.restore_pads()
+	jet.start_life(world.pad_center(0))
+	invulnerable_left = 0.0
+	state = State.PLAYING
+
+
+func _add_score(points: int) -> void:
+	score += points
+	var threshold := int(Params.val("score", "extra_life_at"))
+	if not extra_life_given and score >= threshold:
+		extra_life_given = true
+		lives += 1
+		toast_left = 2.5
+
+
+func _end_game() -> void:
+	state = State.GAME_OVER
+	gameover_left = Params.val("score", "game_over_time")
+
+
+func _after_game_over() -> void:
+	if Highscores.qualifies(score):
+		entry_name = ""
+		state = State.NAME_ENTRY
+	else:
+		_to_title()
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if state == State.NAME_ENTRY and event is InputEventKey and event.pressed and not event.echo:
+		_name_key(event.keycode)
+
+
+func _name_key(keycode: int) -> void:
+	if keycode >= KEY_A and keycode <= KEY_Z:
+		if entry_name.length() < Highscores.NAME_LENGTH:
+			entry_name += char(keycode)
+	elif keycode == KEY_BACKSPACE:
+		entry_name = entry_name.left(maxi(entry_name.length() - 1, 0))
+	elif (keycode == KEY_ENTER or keycode == KEY_KP_ENTER) and not entry_name.is_empty():
+		Highscores.add(entry_name, score)
+		_to_title()
+
+
+func _refresh_overlay() -> void:
+	var l: Array[Dictionary] = []
+	var white := C64.WHITE
+	match state:
+		State.TITLE:
+			l.append({"t": "FALCON PATROL", "y": 22, "s": 3, "c": white})
+			l.append({"t": "REMAKE", "y": 44, "s": 2, "c": C64.YELLOW})
+			l.append({"t": "HIGH SCORES", "y": 66, "s": 1, "c": C64.LIGHT_GREY})
+			if Highscores.entries.is_empty():
+				l.append({"t": "NO SCORES YET", "y": 76, "s": 1, "c": C64.GREY})
+			for i in Highscores.entries.size():
+				var e: Dictionary = Highscores.entries[i]
+				l.append({"t": "%d %s %05d" % [i + 1, e["name"], e["score"]], "y": 76 + i * 8, "s": 1, "c": white})
+			l.append({"t": "PRESS SPACE TO START", "y": 120, "s": 1, "c": C64.LIGHT_GREEN, "blink": true})
+			l.append({"t": "ARROWS FLY  SPACE FIRE  P PAUSE", "y": 130, "s": 1, "c": C64.GREY})
+		State.PAUSED:
+			l.append({"t": "PAUSED", "y": 70, "s": 2, "c": white})
+		State.GAME_OVER:
+			l.append({"t": "GAME OVER", "y": 60, "s": 2, "c": C64.LIGHT_RED})
+			l.append({"t": "SCORE %05d" % score, "y": 82, "s": 1, "c": white})
+		State.NAME_ENTRY:
+			l.append({"t": "NEW HIGH SCORE", "y": 40, "s": 2, "c": C64.YELLOW})
+			l.append({"t": "SCORE %05d" % score, "y": 62, "s": 1, "c": white})
+			l.append({"t": "ENTER YOUR NAME", "y": 80, "s": 1, "c": C64.LIGHT_GREY})
+			l.append({"t": (entry_name + "___").left(Highscores.NAME_LENGTH), "y": 92, "s": 2, "c": white})
+			l.append({"t": "ENTER TO CONFIRM", "y": 118, "s": 1, "c": C64.GREEN, "blink": true})
+		State.PLAYING:
+			if toast_left > 0.0:
+				l.append({"t": "EXTRA JET", "y": 36, "s": 1, "c": C64.YELLOW})
+			if jet.alive and jet.landed and jet.locked:
+				l.append({"t": "REFUELLING", "y": 56, "s": 1, "c": C64.LIGHT_GREEN, "blink": true})
+	overlay.set_lines(l)
 
 
 func _step(dt: float) -> void:
@@ -53,6 +187,7 @@ func _step(dt: float) -> void:
 		if respawn_left <= 0.0:
 			_respawn_jet()
 	invulnerable_left = maxf(invulnerable_left - dt, 0.0)
+	toast_left = maxf(toast_left - dt, 0.0)
 
 	_step_missiles(dt)
 	var pads := world.alive_pad_centers()
@@ -194,7 +329,7 @@ func _kill_enemy(e: Enemy, by_missile: bool) -> void:
 		add_child(w)
 		debris.append(w)
 		var table := Params.arr("score", "points")
-		score += int(Params.val("score", "points_last")) if enemies.is_empty() else int(table[mini(wave_kills, table.size() - 1)])
+		_add_score(int(Params.val("score", "points_last")) if enemies.is_empty() else int(table[mini(wave_kills, table.size() - 1)]))
 		wave_kills += 1
 	e.queue_free()
 
@@ -222,10 +357,8 @@ func _clear_hostiles() -> void:
 ## naechstgelegenen und muss tanken (Abheben erst bei vollem Tank).
 func _respawn_jet() -> void:
 	if lives <= 0:
-		# Platzhalter bis M4 (Game Over): von vorn beginnen
-		lives = int(Params.val("score", "start_lives"))
-		score = 0
-		wave = 0
+		_end_game()
+		return
 	world.restore_pads()
 	jet.start_life(world.pad_center(world.nearest_pad(jet.world_x)))
 	invulnerable_left = 0.0
@@ -316,6 +449,7 @@ func _update_view() -> void:
 	world.jet_vx = jet.vx
 	world.jet_max_speed = Params.val("jet", "max_speed")
 	world.score = score
+	world.hiscore = maxi(Highscores.best(), score)
 	world.lives = maxi(lives, 0)
 	world.ammo = jet.ammo
 	world.ammo_max = int(Params.val("jet", "ammo_max"))
@@ -345,9 +479,16 @@ func _selftest() -> void:
 			failures.append(what)
 	var run := func(seconds: float) -> void:
 		for i in int(seconds * 60.0):
-			_step(1.0 / 60.0)
+			_tick(1.0 / 60.0)
 	var fuel_max := Params.val("jet", "fuel_max")
 	var ground := Params.val("screen", "ground_y")
+	Highscores.path = "user://selftest_scores.json"
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(Highscores.path))
+	Highscores.load_all()
+	check.call(state == State.TITLE and Highscores.entries.is_empty(), "Start im Titelbild, leere Bestenliste")
+	_start_game()
+	check.call(state == State.PLAYING, "Start-Taste beginnt das Spiel")
+	lives = 9
 	wave_pause_left = 1.0e9  # Wellen nur auf Anforderung
 
 	# Start: gelandet, leer, gesperrt
@@ -482,6 +623,55 @@ func _selftest() -> void:
 	lives_before = lives
 	_step(1.0 / 60.0)
 	check.call(not jet.alive and lives == lives_before - 1, "Bombe trifft Jet")
+
+	# Extra-Leben bei 3.000 Punkten, nur einmal
+	score = 2990
+	extra_life_given = false
+	lives_before = lives
+	_add_score(20)
+	check.call(lives == lives_before + 1 and extra_life_given, "Extra-Leben bei 3000 Punkten")
+	_add_score(5000)
+	check.call(lives == lives_before + 1, "Extra-Leben nur einmalig")
+
+	# Pause friert das Spiel ein
+	wave_pause_left = 1.0e9
+	jet.start_life(world.pad_center(0))
+	jet.locked = false
+	jet.landed = false
+	jet.fuel = 50.0
+	jet.position.y = 100.0
+	state = State.PAUSED
+	run.call(0.5)
+	check.call(is_equal_approx(jet.fuel, 50.0), "Pause: Treibstoff bleibt stehen")
+	state = State.PLAYING
+	run.call(0.5)
+	check.call(jet.fuel < 50.0, "Nach der Pause laeuft das Spiel weiter")
+
+	# Game Over, Namenseingabe, Bestenliste
+	score = 1234
+	lives = 1
+	_crash_jet()
+	check.call(lives == 0, "Letztes Leben verloren")
+	run.call(Params.val("jet", "respawn_time") + 0.2)
+	check.call(state == State.GAME_OVER, "Ohne Leben: Game Over")
+	run.call(Params.val("score", "game_over_time") + 0.2)
+	check.call(state == State.NAME_ENTRY, "Highscore: Namenseingabe")
+	for k in [KEY_A, KEY_B, KEY_C, KEY_D]:
+		_name_key(k)
+	check.call(entry_name == "ABC", "Name hat hoechstens 3 Buchstaben")
+	_name_key(KEY_BACKSPACE)
+	check.call(entry_name == "AB", "Backspace loescht einen Buchstaben")
+	_name_key(KEY_C)
+	_name_key(KEY_ENTER)
+	check.call(state == State.TITLE and Highscores.entries.size() == 1 and Highscores.entries[0]["name"] == "ABC" and Highscores.entries[0]["score"] == 1234, "Eintrag gespeichert, zurueck zum Titel")
+	Highscores.load_all()
+	check.call(Highscores.entries.size() == 1 and Highscores.entries[0]["name"] == "ABC", "Bestenliste ueberlebt Neuladen")
+	for i in 5:
+		Highscores.add("TOP", 9000 + i)
+	check.call(Highscores.entries.size() == 5 and not Highscores.qualifies(100) and Highscores.qualifies(9500), "Bestenliste: Top 5, nur bessere Werte qualifizieren")
+	_start_game()
+	check.call(state == State.PLAYING and score == 0 and lives == int(Params.val("score", "start_lives")) and world.alive_pad_count() == 6 and jet.landed and jet.locked, "Neues Spiel setzt alles zurueck")
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(Highscores.path))
 
 	if failures.is_empty():
 		print("SELFTEST OK")
