@@ -42,6 +42,8 @@ func _ready() -> void:
 	add_child(sfx)
 	_rng.seed = int(Params.val("world", "seed"))
 	Highscores.load_all()
+	Settings.load_all()
+	crt.visible = Settings.crt
 	lives = int(Params.val("score", "start_lives"))
 	_to_title()
 	if OS.get_cmdline_user_args().has("--selftest"):
@@ -105,6 +107,7 @@ func _start_game() -> void:
 	_clear_hostiles()
 	world.restore_pads()
 	jet.start_life(world.pad_center(0))
+	_apply_skip_refuel()
 	invulnerable_left = 0.0
 	state = State.PLAYING
 
@@ -138,6 +141,14 @@ func _unhandled_input(event: InputEvent) -> void:
 			_name_key(event.keycode)
 		elif event.keycode == KEY_C:
 			crt.visible = not crt.visible
+			Settings.crt = crt.visible
+			Settings.save()
+		elif event.keycode == KEY_T and (state == State.TITLE or state == State.PAUSED):
+			Settings.skip_refuel = not Settings.skip_refuel
+			Settings.save()
+		elif event.keycode == KEY_F:
+			var full := DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
+			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED if full else DisplayServer.WINDOW_MODE_FULLSCREEN)
 
 
 ## Dauerklaenge je nach Zustand: Triebwerk wird lauter, je naeher ein Gegner
@@ -171,6 +182,10 @@ func _name_key(keycode: int) -> void:
 		_to_title()
 
 
+func _onoff(on: bool) -> String:
+	return "ON" if on else "OFF"
+
+
 func _refresh_overlay() -> void:
 	var l: Array[Dictionary] = []
 	var white := C64.WHITE
@@ -185,10 +200,12 @@ func _refresh_overlay() -> void:
 				var e: Dictionary = Highscores.entries[i]
 				l.append({"t": "%d %s %05d" % [i + 1, e["name"], e["score"]], "y": 70 + i * 8, "s": 1, "c": white})
 			l.append({"t": "PRESS SPACE TO START", "y": 112, "s": 1, "c": C64.LIGHT_GREEN, "blink": true})
-			l.append({"t": "ARROWS FLY  SPACE FIRE", "y": 122, "s": 1, "c": C64.GREY})
-			l.append({"t": "P PAUSE  C SCANLINES", "y": 130, "s": 1, "c": C64.GREY})
+			l.append({"t": "ARROWS FLY  SPACE FIRE  P PAUSE", "y": 120, "s": 1, "c": C64.GREY})
+			l.append({"t": "C SCANLINES %s   T SKIP REFUEL %s" % [_onoff(crt.visible), _onoff(Settings.skip_refuel)], "y": 128, "s": 1, "c": C64.GREY})
+			l.append({"t": "F FULLSCREEN", "y": 136, "s": 1, "c": C64.GREY})
 		State.PAUSED:
-			l.append({"t": "PAUSED", "y": 70, "s": 2, "c": white})
+			l.append({"t": "PAUSED", "y": 62, "s": 2, "c": white})
+			l.append({"t": "T SKIP REFUEL %s" % _onoff(Settings.skip_refuel), "y": 84, "s": 1, "c": C64.GREY})
 		State.GAME_OVER:
 			l.append({"t": "GAME OVER", "y": 60, "s": 2, "c": C64.LIGHT_RED})
 			l.append({"t": "SCORE %05d" % score, "y": 82, "s": 1, "c": white})
@@ -396,7 +413,7 @@ func _clear_hostiles() -> void:
 	missiles.clear()
 	debris.clear()
 	wave_active = false
-	wave_pause_left = Params.val("enemy", "first_wave_delay")
+	wave_pause_left = _first_wave_delay()
 
 
 ## Neues Leben: alle Flugplaetze sind wieder intakt, der Jet steht leer auf dem
@@ -407,7 +424,20 @@ func _respawn_jet() -> void:
 		return
 	world.restore_pads()
 	jet.start_life(world.pad_center(world.nearest_pad(jet.world_x)))
+	_apply_skip_refuel()
 	invulnerable_left = 0.0
+
+
+func _first_wave_delay() -> float:
+	return Params.val("enemy", "first_wave_delay_skip" if Settings.skip_refuel else "first_wave_delay")
+
+
+## Option "Tanksequenz ueberspringen": voller Tank, abflugbereit.
+func _apply_skip_refuel() -> void:
+	if Settings.skip_refuel:
+		jet.fuel = Params.val("jet", "fuel_max")
+		jet.ammo = int(Params.val("jet", "ammo_max"))
+		jet.locked = false
 
 
 # --- Wellen -----------------------------------------------------------------
@@ -541,8 +571,25 @@ func _selftest() -> void:
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(Highscores.path))
 	Highscores.load_all()
 	check.call(state == State.TITLE and Highscores.entries.is_empty(), "Start im Titelbild, leere Bestenliste")
+	Settings.path = "user://selftest_settings.json"
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(Settings.path))
+	Settings.load_all()
+	check.call(not Settings.skip_refuel and not Settings.crt, "Optionen starten mit Standardwerten")
+	Settings.skip_refuel = true
+	Settings.crt = true
+	Settings.save()
+	Settings.skip_refuel = false
+	Settings.crt = false
+	Settings.load_all()
+	check.call(Settings.skip_refuel and Settings.crt, "Optionen werden gespeichert und geladen")
 	_start_game()
-	check.call(state == State.PLAYING, "Start-Taste beginnt das Spiel")
+	check.call(not jet.locked and jet.fuel >= Params.val("jet", "fuel_max") and jet.ammo == int(Params.val("jet", "ammo_max")), "Option Tanksequenz ueberspringen: abflugbereit")
+	check.call(wave_pause_left == Params.val("enemy", "first_wave_delay_skip"), "Option verkuerzt die Wartezeit auf die erste Welle")
+	Settings.skip_refuel = false
+	Settings.crt = false
+	Settings.save()
+	_start_game()
+	check.call(state == State.PLAYING and jet.locked and jet.fuel == 0.0, "Ohne Option: Tanksequenz am Start")
 	lives = 9
 	wave_pause_left = 1.0e9  # Wellen nur auf Anforderung
 
@@ -742,6 +789,7 @@ func _selftest() -> void:
 	_start_game()
 	check.call(state == State.PLAYING and score == 0 and lives == int(Params.val("score", "start_lives")) and world.alive_pad_count() == 6 and jet.landed and jet.locked, "Neues Spiel setzt alles zurueck")
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(Highscores.path))
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(Settings.path))
 
 	if failures.is_empty():
 		print("SELFTEST OK")

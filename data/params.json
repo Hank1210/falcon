@@ -63,7 +63,8 @@
 		"waves_per_step": 6,
 		"max_wave_size": 4,
 		"leave_distance": 600.0,
-		"bomb_aim_error": 35.0
+		"bomb_aim_error": 35.0,
+		"first_wave_delay_skip": 6.0
 	},
 	"score": {
 		"points": [
