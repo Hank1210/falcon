@@ -15,11 +15,11 @@ var vy := 0.0
 
 
 func width() -> float:
-	return 2.0 if kind == Kind.BOMB else float(TEXTURE.get_width())
+	return 2.0 if kind == Kind.BOMB else Art.w(TEXTURE)
 
 
 func height() -> float:
-	return 4.0 if kind == Kind.BOMB else float(TEXTURE.get_height())
+	return 4.0 if kind == Kind.BOMB else Art.h(TEXTURE)
 
 
 func center_x() -> float:
@@ -46,4 +46,4 @@ func _draw() -> void:
 		draw_rect(Rect2(0, 0, 2, 3), C64.LIGHT_GREY)
 		draw_rect(Rect2(0, 3, 2, 1), C64.WHITE)
 	else:
-		draw_texture(TEXTURE, Vector2.ZERO, WRECK_COLOR)
+		draw_texture_rect(TEXTURE, Rect2(Vector2.ZERO, Art.size(TEXTURE)), false, WRECK_COLOR)

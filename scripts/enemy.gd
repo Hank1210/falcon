@@ -19,9 +19,10 @@ var _bottom: float
 
 func _ready() -> void:
 	centered = false
+	scale = Vector2(Art.SCALE, Art.SCALE)
 	flip_h = dir < 0
 	_top = Params.val("screen", "sky_top")
-	_bottom = Params.val("screen", "ground_y") - texture.get_height() - 4.0
+	_bottom = Params.val("screen", "ground_y") - Art.h(texture) - 4.0
 
 
 func step(dt: float, jet_x: float, jet_y: float, pads: Array[float], rng: RandomNumberGenerator) -> void:
@@ -48,8 +49,8 @@ func _turn(jet_y: float, pads: Array[float], rng: RandomNumberGenerator) -> void
 
 
 func center_x() -> float:
-	return world_x + texture.get_width() * 0.5
+	return world_x + Art.w(texture) * 0.5
 
 
 func center_y() -> float:
-	return position.y + texture.get_height() * 0.5
+	return position.y + Art.h(texture) * 0.5

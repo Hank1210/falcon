@@ -26,12 +26,13 @@ func step(dt: float) -> bool:
 
 func _draw() -> void:
 	var t := age / life
-	var n := 16
+	var n := 28
 	for i in n:
 		var a := float(i) / n * TAU + float(i % 3) * 0.4
 		var r := t * radius * (0.5 + 0.5 * fposmod(i * 0.37, 1.0))
 		var p := (Vector2(cos(a), sin(a)) * r).round()
-		var size := 2.0 if t < 0.6 else 1.0
+		var size := 1.0 if t < 0.6 else 0.5
 		draw_rect(Rect2(p - Vector2(size, size) * 0.5, Vector2(size, size)), COLORS[(i + int(age * 20.0)) % COLORS.size()])
 	if t < 0.25:
 		draw_rect(Rect2(-2, -2, 4, 4), C64.WHITE)
+		draw_rect(Rect2(-1, -1, 2, 2), C64.YELLOW)

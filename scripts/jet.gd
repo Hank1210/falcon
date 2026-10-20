@@ -28,11 +28,12 @@ var _bottom: float
 
 func _ready() -> void:
 	centered = false
+	scale = Vector2(Art.SCALE, Art.SCALE)
 	modulate = C64.BLUE
 	side_texture = texture
 	_world_w = Params.val("world", "width")
 	_top = Params.val("screen", "sky_top")
-	_bottom = Params.val("screen", "ground_y") - texture.get_height()
+	_bottom = Params.val("screen", "ground_y") - Art.h(texture)
 	position.y = Params.val("jet", "start_altitude")
 	screen_x = Params.val("jet", "screen_x_ahead")
 	fuel = Params.val("jet", "fuel_max")
@@ -89,7 +90,7 @@ func _fly(dt: float, h: int, v: int) -> void:
 func _update_camera(dt: float) -> void:
 	var target := Params.val("jet", "screen_x_ahead") if facing > 0 else Params.val("jet", "screen_x_behind")
 	screen_x = lerpf(screen_x, target, 1.0 - exp(-Params.val("jet", "camera_rate") * dt))
-	position.x = roundf(screen_x)
+	position.x = snappedf(screen_x, 0.5)
 	flip_h = facing < 0
 
 
@@ -126,13 +127,13 @@ func start_life(pad_center_x: float) -> void:
 	alive = true
 	visible = true
 	engine_out = false
-	world_x = fposmod(pad_center_x - texture.get_width() * 0.5, _world_w)
+	world_x = fposmod(pad_center_x - Art.w(texture) * 0.5, _world_w)
 	fuel = 0.0
 	ammo = 0
 	_ammo_progress = 0.0
 	locked = true
 	land()
-	position.x = roundf(screen_x)
+	position.x = snappedf(screen_x, 0.5)
 
 
 ## Tankt und rearmiert (nur im Stand auf einem Flugplatz). Gibt true zurueck,
@@ -164,11 +165,11 @@ func is_front_view() -> bool:
 
 
 func center_x() -> float:
-	return world_x + texture.get_width() * 0.5
+	return world_x + Art.w(texture) * 0.5
 
 
 func center_y() -> float:
-	return position.y + texture.get_height() * 0.5
+	return position.y + Art.h(texture) * 0.5
 
 
 ## Linke Kante des Bildschirms in Weltkoordinaten.

@@ -26,7 +26,7 @@ func _process(_delta: float) -> void:
 
 func _draw() -> void:
 	if panel.size != Vector2.ZERO:
-		draw_rect(panel, Color(0, 0, 0, 0.6))
+		draw_rect(panel, Color(0, 0, 0, 0.82))
 	var width := Params.val("screen", "width")
 	var on := (Engine.get_physics_frames() / 30) % 2 == 0
 	for l in lines:

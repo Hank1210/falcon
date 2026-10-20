@@ -192,39 +192,39 @@ func _refresh_overlay() -> void:
 	var white := C64.WHITE
 	match state:
 		State.TITLE:
-			panel = Rect2(24, 8, 272, 140)
-			l.append({"t": "FALCON PATROL", "y": 22, "s": 3, "c": white})
-			l.append({"t": "REMAKE", "y": 44, "s": 2, "c": C64.YELLOW})
-			l.append({"t": "HIGH SCORES", "y": 60, "s": 1, "c": C64.LIGHT_GREY})
+			panel = Rect2(24, 6, 272, 150)
+			l.append({"t": "FALCON PATROL", "y": 12, "s": 3, "c": white})
+			l.append({"t": "REMAKE", "y": 38, "s": 2, "c": C64.YELLOW})
+			l.append({"t": "HIGH SCORES", "y": 58, "s": 1, "c": C64.LIGHT_GREY})
 			if Highscores.entries.is_empty():
-				l.append({"t": "NO SCORES YET", "y": 70, "s": 1, "c": C64.GREY})
+				l.append({"t": "NO SCORES YET", "y": 68, "s": 1, "c": C64.GREY})
 			for i in Highscores.entries.size():
 				var e: Dictionary = Highscores.entries[i]
-				l.append({"t": "%d %s %05d" % [i + 1, e["name"], e["score"]], "y": 70 + i * 8, "s": 1, "c": white})
-			l.append({"t": "PRESS SPACE TO START", "y": 112, "s": 1, "c": C64.LIGHT_GREEN, "blink": true})
-			l.append({"t": "ARROWS FLY  SPACE FIRE  P PAUSE", "y": 120, "s": 1, "c": C64.GREY})
-			l.append({"t": "C SCANLINES %s   T SKIP REFUEL %s" % [_onoff(crt.visible), _onoff(Settings.skip_refuel)], "y": 128, "s": 1, "c": C64.GREY})
-			l.append({"t": "F FULLSCREEN", "y": 136, "s": 1, "c": C64.GREY})
+				l.append({"t": "%d %s %05d" % [i + 1, e["name"], e["score"]], "y": 68 + i * 9, "s": 1, "c": white})
+			l.append({"t": "PRESS SPACE TO START", "y": 116, "s": 1, "c": C64.LIGHT_GREEN, "blink": true})
+			l.append({"t": "ARROWS FLY  SPACE FIRE  P PAUSE", "y": 126, "s": 1, "c": C64.GREY})
+			l.append({"t": "C SCANLINES %s   T SKIP REFUEL %s" % [_onoff(crt.visible), _onoff(Settings.skip_refuel)], "y": 135, "s": 1, "c": C64.GREY})
+			l.append({"t": "F FULLSCREEN", "y": 144, "s": 1, "c": C64.GREY})
 		State.PAUSED:
-			panel = Rect2(60, 50, 200, 50)
-			l.append({"t": "PAUSED", "y": 62, "s": 2, "c": white})
-			l.append({"t": "T SKIP REFUEL %s" % _onoff(Settings.skip_refuel), "y": 84, "s": 1, "c": C64.GREY})
+			panel = Rect2(60, 44, 200, 50)
+			l.append({"t": "PAUSED", "y": 52, "s": 2, "c": white})
+			l.append({"t": "T SKIP REFUEL %s" % _onoff(Settings.skip_refuel), "y": 76, "s": 1, "c": C64.GREY})
 		State.GAME_OVER:
-			panel = Rect2(60, 46, 200, 60)
-			l.append({"t": "GAME OVER", "y": 60, "s": 2, "c": C64.LIGHT_RED})
-			l.append({"t": "SCORE %05d" % score, "y": 82, "s": 1, "c": white})
+			panel = Rect2(60, 40, 200, 50)
+			l.append({"t": "GAME OVER", "y": 48, "s": 2, "c": C64.LIGHT_RED})
+			l.append({"t": "SCORE %05d" % score, "y": 70, "s": 1, "c": white})
 		State.NAME_ENTRY:
-			panel = Rect2(40, 30, 240, 104)
-			l.append({"t": "NEW HIGH SCORE", "y": 40, "s": 2, "c": C64.YELLOW})
-			l.append({"t": "SCORE %05d" % score, "y": 62, "s": 1, "c": white})
-			l.append({"t": "ENTER YOUR NAME", "y": 80, "s": 1, "c": C64.LIGHT_GREY})
-			l.append({"t": (entry_name + "___").left(Highscores.NAME_LENGTH), "y": 92, "s": 2, "c": white})
-			l.append({"t": "ENTER TO CONFIRM", "y": 118, "s": 1, "c": C64.GREEN, "blink": true})
+			panel = Rect2(40, 28, 240, 90)
+			l.append({"t": "NEW HIGH SCORE", "y": 34, "s": 2, "c": C64.YELLOW})
+			l.append({"t": "SCORE %05d" % score, "y": 54, "s": 1, "c": white})
+			l.append({"t": "ENTER YOUR NAME", "y": 68, "s": 1, "c": C64.LIGHT_GREY})
+			l.append({"t": (entry_name + "___").left(Highscores.NAME_LENGTH), "y": 80, "s": 2, "c": white})
+			l.append({"t": "ENTER TO CONFIRM", "y": 102, "s": 1, "c": C64.GREEN, "blink": true})
 		State.PLAYING:
 			if toast_left > 0.0:
-				l.append({"t": "EXTRA JET", "y": 36, "s": 1, "c": C64.YELLOW})
+				l.append({"t": "EXTRA JET", "y": 30, "s": 1, "c": C64.YELLOW})
 			if jet.alive and jet.landed and jet.locked:
-				l.append({"t": "REFUELLING", "y": 56, "s": 1, "c": C64.LIGHT_GREEN, "blink": true})
+				l.append({"t": "REFUELLING", "y": 52, "s": 1, "c": C64.LIGHT_GREEN, "blink": true})
 	overlay.set_lines(l, panel)
 
 
@@ -269,8 +269,8 @@ func _try_fire() -> bool:
 	var dir := jet.facing
 	m.vx = dir * Params.val("jet", "missile_speed")
 	m.life = Params.val("jet", "missile_life")
-	m.world_x = jet.world_x + (JET_TEXTURE.get_width() if dir > 0 else -Missile.WIDTH)
-	m.position.y = jet.position.y + JET_TEXTURE.get_height() * 0.5 - 0.5
+	m.world_x = jet.world_x + (Art.w(JET_TEXTURE) if dir > 0 else -Missile.WIDTH)
+	m.position.y = jet.position.y + Art.h(JET_TEXTURE) * 0.5 - 0.5
 	add_child(m)
 	missiles.append(m)
 	jet.ammo -= 1
@@ -286,7 +286,7 @@ func _step_missiles(dt: float) -> void:
 
 
 func _bomb_release_y(e: Enemy) -> float:
-	return e.position.y + JET_TEXTURE.get_height()
+	return e.position.y + Art.h(JET_TEXTURE)
 
 
 ## Gegner werfen Bomben so, dass sie (mit Vorhalt) auf einen intakten
@@ -342,7 +342,7 @@ func _step_debris(dt: float) -> void:
 			debris.erase(d)
 			d.queue_free()
 		elif d.kind == Debris.Kind.BOMB and jet.alive and invulnerable_left <= 0.0 \
-				and _overlap(d.center_x(), d.center_y(), d.width(), d.height(), jet.center_x(), jet.center_y(), JET_TEXTURE.get_width(), JET_TEXTURE.get_height()):
+				and _overlap(d.center_x(), d.center_y(), d.width(), d.height(), jet.center_x(), jet.center_y(), Art.w(JET_TEXTURE), Art.h(JET_TEXTURE)):
 			_explode(d.center_x(), d.center_y(), false)
 			debris.erase(d)
 			d.queue_free()
@@ -357,8 +357,8 @@ func _overlap(ax: float, ay: float, aw: float, ah: float, bx: float, by: float, 
 
 
 func _check_hits() -> void:
-	var ew := float(JET_TEXTURE.get_width())
-	var eh := float(JET_TEXTURE.get_height())
+	var ew := Art.w(JET_TEXTURE)
+	var eh := Art.h(JET_TEXTURE)
 	for m in missiles.duplicate():
 		for e in enemies.duplicate():
 			if _overlap(m.center_x(), m.position.y + 0.5, Missile.WIDTH, Missile.HEIGHT, e.center_x(), e.center_y(), ew, eh):

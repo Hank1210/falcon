@@ -62,7 +62,7 @@ func _build_world() -> void:
 	while x < _world_w - 10.0:
 		var kind: String = kinds[rng.randi() % kinds.size()]
 		var tex: Texture2D = DECOR[kind]
-		var upper_min := maxf(_ground_y + tex.get_height() + 3.0, _ground_y + 20.0)
+		var upper_min := maxf(_ground_y + Art.h(tex) + 3.0, _ground_y + 20.0)
 		var upper_max := _ground_y + MAIN_ROAD - 3.0
 		var base: float
 		if upper_min <= upper_max and not _near_pad(x, 26.0) and rng.randf() < 0.5:
@@ -89,7 +89,7 @@ func _near_pad(x: float, margin: float) -> bool:
 
 func to_screen_x(world_x: float) -> float:
 	## Bildschirm-x eines Welt-x, im Bereich [-64, world_w - 64).
-	return fposmod(world_x - roundf(cam_x) + 64.0, _world_w) - 64.0
+	return fposmod(world_x - snappedf(cam_x, 0.5) + 64.0, _world_w) - 64.0
 
 
 ## Index des Landeplatzes unter Welt-x (-1 = keiner). `margin` verengt den
@@ -159,8 +159,12 @@ func _draw() -> void:
 		if sx > _screen_w:
 			continue
 		var tex: Texture2D = d["tex"]
-		draw_texture(tex, Vector2(sx, d["base"] - tex.get_height()))
+		_tex(tex, Vector2(sx, d["base"] - Art.h(tex)))
 	_draw_hud()
+
+
+func _tex(tex: Texture2D, pos: Vector2) -> void:
+	draw_texture_rect(tex, Rect2(pos, Art.size(tex)), false)
 
 
 func _draw_roads() -> void:
@@ -190,7 +194,7 @@ func _draw_pads() -> void:
 		if sx > _screen_w:
 			continue
 		if _pad_alive[i]:
-			draw_texture(PAD_TEXTURE, Vector2(sx, _ground_y))
+			_tex(PAD_TEXTURE, Vector2(sx, _ground_y))
 		else:
 			draw_rect(Rect2(sx, _ground_y, pad_w, 8), C64.BLACK)
 			draw_rect(Rect2(sx + 4, _ground_y + 5, 6, 3), C64.DARK_GREY)
@@ -221,32 +225,32 @@ func _draw_hud() -> void:
 
 
 func _draw_left_panel() -> void:
-	_panel(Rect2(2, 168, 78, 30))
-	_text("SCORE", 6, 170, C64.CYAN)
-	_text("%05d" % score, 6, 177, C64.WHITE)
-	_text("HI", 6, 184, C64.CYAN)
-	_text("%05d" % hiscore, 6, 191, C64.LIGHT_BLUE)
-	draw_texture(LIFE_ICON, Vector2(58, 172))
-	_text(str(lives % 10), 63, 183, C64.BLUE)
+	_panel(Rect2(2, 165, 78, 34))
+	_text("SCORE", 6, 166, C64.CYAN)
+	_text("%05d" % score, 6, 174, C64.WHITE)
+	_text("HI", 6, 182, C64.CYAN)
+	_text("%05d" % hiscore, 6, 190, C64.LIGHT_BLUE)
+	_tex(LIFE_ICON, Vector2(52, 170))
+	_text(str(lives % 10), 56, 179, C64.BLUE)
 
 
 func _draw_right_panel() -> void:
-	_panel(Rect2(240, 168, 78, 30))
-	_text_centered("GAS", 279, 170, C64.CYAN)
-	draw_rect(Rect2(246, 177, 66, 6), C64.DARK_GREY)
+	_panel(Rect2(240, 165, 78, 34))
+	_text_centered("GAS", 279, 166, C64.CYAN)
+	draw_rect(Rect2(246, 175, 66, 6), C64.DARK_GREY)
 	var low := fuel < Params.val("jet", "fuel_low") and (Engine.get_physics_frames() / 15) % 2 == 0
-	draw_rect(Rect2(246, 177, roundf(66.0 * fuel / fuel_max), 6), C64.LIGHT_RED if low else C64.RED)
-	_text_centered("AAM", 279, 185, C64.CYAN)
-	_text_centered("%03d" % ammo, 279, 192, C64.YELLOW)
+	draw_rect(Rect2(246, 175, roundf(66.0 * fuel / fuel_max), 6), C64.LIGHT_RED if low else C64.RED)
+	_text_centered("AAM", 279, 183, C64.CYAN)
+	_text_centered("%03d" % ammo, 279, 191, C64.YELLOW)
 
 
 ## Radar: auf den Spieler zentriert, zeigt die ganze Welt als Ring.
 func _draw_radar() -> void:
-	draw_rect(Rect2(92, 167, 136, 32), C64.GREY)
-	draw_rect(Rect2(92, 167, 136, 32), C64.DARK_GREY, false)
-	var win := Rect2(96, 170, 128, 16)
+	draw_rect(Rect2(92, 165, 136, 34), C64.GREY)
+	draw_rect(Rect2(92, 165, 136, 34), C64.DARK_GREY, false)
+	var win := Rect2(96, 168, 128, 17)
 	draw_rect(win, C64.BLACK)
-	draw_rect(Rect2(96, 186, 128, 9), C64.YELLOW)
+	draw_rect(Rect2(96, 185, 128, 10), C64.YELLOW)
 	var half := win.size.x * 0.5
 	for i in _pads.size():
 		if _pad_alive[i]:
@@ -263,7 +267,7 @@ func _draw_radar() -> void:
 ## Tempoanzeige im gelben Streifen des Radars: Mitte = Stillstand, Ausschlag in
 ## Flugrichtung. Beim Stillstand leuchtet die Mitte gruen (Landung moeglich).
 func _draw_speed_gauge() -> void:
-	var box := Rect2(120, 188, 80, 5)
+	var box := Rect2(120, 188, 80, 4)
 	var mid := box.position.x + box.size.x * 0.5
 	draw_rect(box, C64.DARK_GREY, false)
 	var len := jet_vx / jet_max_speed * (box.size.x * 0.5 - 2.0)
