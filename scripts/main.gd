@@ -266,6 +266,12 @@ func _step_debris(dt: float) -> void:
 			if pad >= 0:
 				world.destroy_pad(pad)
 				_explode(world.pad_center(pad), ground - 3.0, true)
+				# Ein Jet, der gerade auf diesem Flugplatz steht, geht mit hoch.
+				if jet.alive and jet.landed and world.pad_index_at(jet.center_x(), 0.0, false) == pad:
+					debris.erase(d)
+					d.queue_free()
+					_crash_jet()
+					break
 			else:
 				_explode(d.center_x(), ground - 2.0, false)
 			debris.erase(d)
@@ -623,6 +629,21 @@ func _selftest() -> void:
 	lives_before = lives
 	_step(1.0 / 60.0)
 	check.call(not jet.alive and lives == lives_before - 1, "Bombe trifft Jet")
+
+	# Bombe zerstoert den Flugplatz, auf dem der Jet steht: Jet ist verloren
+	run.call(Params.val("jet", "respawn_time") + 0.2)
+	check.call(jet.alive and jet.landed, "Jet steht wieder auf einem Flugplatz")
+	invulnerable_left = 0.0
+	var under := world.pad_index_at(jet.center_x())
+	var side_bomb := Debris.new()
+	side_bomb.world_x = jet.center_x() + 16.0
+	side_bomb.position.y = ground - 6.0
+	add_child(side_bomb)
+	debris.append(side_bomb)
+	lives_before = lives
+	_step(1.0 / 60.0)
+	check.call(under >= 0 and not world.pad_alive(under) and not jet.alive and lives == lives_before - 1, "Gelandeter Jet wird mit dem Flugplatz zerstoert")
+	run.call(Params.val("jet", "respawn_time") + 0.2)
 
 	# Extra-Leben bei 3.000 Punkten, nur einmal
 	score = 2990
