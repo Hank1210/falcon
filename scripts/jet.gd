@@ -2,6 +2,9 @@ class_name Jet
 extends Sprite2D
 ## Spieler-Jet: Traegheit in beiden Achsen, Treibstoff, Landen, Kamera-Vorlauf.
 
+const FRONT_TEXTURE := preload("res://assets/sprites/jet_front.png")
+
+var side_texture: Texture2D
 var world_x := 0.0  ## linke Kante in der Welt (gewrappt)
 var vx := 0.0
 var vy := 0.0
@@ -26,6 +29,7 @@ var _bottom: float
 func _ready() -> void:
 	centered = false
 	modulate = C64.BLUE
+	side_texture = texture
 	_world_w = Params.val("world", "width")
 	_top = Params.val("screen", "sky_top")
 	_bottom = Params.val("screen", "ground_y") - texture.get_height()
@@ -146,6 +150,17 @@ func service(dt: float) -> bool:
 	if full:
 		locked = false
 	return full
+
+
+## Frontansicht beim Landen und Schweben, Seitenansicht im Flug.
+func set_front_view(on: bool) -> void:
+	var wanted := FRONT_TEXTURE if on else side_texture
+	if texture != wanted:
+		texture = wanted
+
+
+func is_front_view() -> bool:
+	return texture == FRONT_TEXTURE
 
 
 func center_x() -> float:

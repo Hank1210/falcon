@@ -530,6 +530,7 @@ func _place(node: Node2D, wx: float) -> void:
 
 
 func _update_view() -> void:
+	jet.set_front_view(jet.alive and (jet.landed or (not jet.engine_out and absf(jet.vx) < 1.0 and world.pad_index_at(jet.center_x()) >= 0)))
 	world.cam_x = jet.camera_x()
 	world.jet_center_x = jet.center_x()
 	world.jet_vx = jet.vx
@@ -610,6 +611,17 @@ func _selftest() -> void:
 	# Wellengroesse und Pausen
 	check.call(_wave_size(0) == 2 and _wave_size(5) == 2 and _wave_size(6) == 3 and _wave_size(12) == 4 and _wave_size(40) == 4, "Wellengroesse 2/3/4")
 	check.call(_wave_pause(1) > _wave_pause(10) and _wave_pause(100) == Params.val("enemy", "wave_pause_min"), "Pausen werden kuerzer, mit Untergrenze")
+
+	# Frontansicht: gelandet ja, im Flug nein
+	jet.landed = true
+	_update_view()
+	check.call(jet.is_front_view(), "Gelandeter Jet zeigt die Frontansicht")
+	jet.landed = false
+	jet.vx = 100.0
+	_update_view()
+	check.call(not jet.is_front_view(), "Fliegender Jet zeigt die Seitenansicht")
+	jet.vx = 0.0
+	jet.landed = true
 
 	# Raketenabschuss, letzter Gegner der Welle gibt 200
 	var base_wave := wave
