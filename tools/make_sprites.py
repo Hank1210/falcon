@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Wandelt Text-Pixelkarten (tools/sprites/*.txt) in PNGs (assets/sprites/*.png).
 
-'.' ist transparent, '#' ist weiss. Gegner und Spieler unterscheiden sich im
+'.' ist transparent, Buchstaben sind C64-Farben (siehe COLORS). Gegner und Spieler unterscheiden sich im
 Original nur durch die Farbe, daher wird die Farbe im Spiel per modulate gesetzt.
 Nur Standardbibliothek, keine Abhaengigkeiten.
 """
@@ -14,9 +14,29 @@ ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "tools" / "sprites"
 DST = ROOT / "assets" / "sprites"
 
+def rgb(hexstr: str) -> tuple[int, int, int, int]:
+    return (int(hexstr[0:2], 16), int(hexstr[2:4], 16), int(hexstr[4:6], 16), 255)
+
+
+# C64-Palette (Pepto), je ein Buchstabe pro Farbe
 COLORS = {
     ".": (0, 0, 0, 0),
-    "#": (255, 255, 255, 255),
+    "#": rgb("ffffff"),  # weiss
+    "k": rgb("000000"),  # schwarz
+    "r": rgb("68372b"),  # rot
+    "R": rgb("9a6759"),  # hellrot
+    "c": rgb("70a4b2"),  # cyan
+    "p": rgb("6f3d86"),  # lila
+    "g": rgb("588d43"),  # gruen
+    "G": rgb("9ad284"),  # hellgruen
+    "b": rgb("352879"),  # blau
+    "B": rgb("6c5eb5"),  # hellblau
+    "y": rgb("b8c76f"),  # gelb
+    "o": rgb("6f4f25"),  # orange
+    "n": rgb("433900"),  # braun
+    "d": rgb("444444"),  # dunkelgrau
+    "m": rgb("6c6c6c"),  # mittelgrau
+    "l": rgb("959595"),  # hellgrau
 }
 
 

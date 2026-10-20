@@ -16,6 +16,13 @@ var fuel := 0.0
 var hiscore := 0
 var fuel_max := 1.0
 
+const TEXTURES := {
+	"palm": preload("res://assets/sprites/palm.png"),
+	"tank": preload("res://assets/sprites/tank.png"),
+	"building": preload("res://assets/sprites/building.png"),
+	"truck": preload("res://assets/sprites/truck.png"),
+}
+
 var _features: Array[Dictionary] = []
 var _pads: Array[float] = []
 var _pad_alive: Array[bool] = []
@@ -39,7 +46,7 @@ func _build_world() -> void:
 	for i in pad_count:
 		_pads.append(i * spacing + spacing * 0.5)
 		_pad_alive.append(true)
-	var types := ["palm", "palm", "tank", "building"]
+	var types := ["palm", "palm", "tank", "building", "truck"]
 	var x := 20.0
 	while x < _world_w - 20.0:
 		if not _near_pad(x, 36.0):
@@ -126,17 +133,8 @@ func _draw() -> void:
 		var sx := to_screen_x(f.x)
 		if sx > _screen_w:
 			continue
-		match f.type:
-			"palm":
-				draw_rect(Rect2(sx + 3, base - 14, 2, 14), C64.BROWN)
-				draw_rect(Rect2(sx, base - 18, 8, 4), C64.GREEN)
-			"tank":
-				draw_rect(Rect2(sx, base - 10, 14, 10), C64.LIGHT_GREY)
-				draw_rect(Rect2(sx, base - 10, 14, 2), C64.GREY)
-			"building":
-				draw_rect(Rect2(sx, base - 16, 18, 16), C64.DARK_GREY)
-				draw_rect(Rect2(sx + 3, base - 12, 4, 4), C64.YELLOW)
-				draw_rect(Rect2(sx + 11, base - 12, 4, 4), C64.YELLOW)
+		var tex: Texture2D = TEXTURES[f.type]
+		draw_texture(tex, Vector2(sx, base - tex.get_height()))
 	var pad_w := Params.val("world", "pad_width")
 	for i in _pads.size():
 		var sx := to_screen_x(_pads[i] - pad_w * 0.5)

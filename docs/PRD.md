@@ -2,7 +2,7 @@
 
 Status: Entwurf v0.1 · Datum: 2026-10-20
 
-**Fortschritt:** M0 bis M4 sind umgesetzt (Spielkern, Landen und Tanken, Bomben, Wellen, Titelbild, Game Over, Highscore, Pause). Offen: M5 (eigene Pixel-Grafik und Sound), M6 (Feinschliff, Export). Messwerte aus dem Original stehen noch aus (siehe ORIGINAL-RULES.md).
+**Fortschritt:** M0 bis M5 sind umgesetzt (Spielkern, Landen und Tanken, Bomben, Wellen, Titelbild, Game Over, Highscore, Pause, synthetisierte Sounds, Pixel-Grafik, Scanlines). Offen: M6 (Feinschliff, Export); Klang und Optik sind noch nicht am Original abgeglichen. Messwerte aus dem Original stehen noch aus (siehe ORIGINAL-RULES.md).
 
 ## 1. Ziel und Vision
 

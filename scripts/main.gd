@@ -8,6 +8,7 @@ const ENEMY_COLOR := C64.LIGHT_RED
 @onready var world: World = $World
 @onready var jet: Jet = $Jet
 @onready var overlay: Overlay = $Overlay
+@onready var crt: Crt = $Crt
 
 enum State { TITLE, PLAYING, PAUSED, GAME_OVER, NAME_ENTRY }
 
@@ -31,10 +32,14 @@ var wave_pause_left := 0.0
 var respawn_left := 0.0
 var invulnerable_left := 0.0
 
+var sfx := Sfx.new()
+
 var _rng := RandomNumberGenerator.new()
+var _service_done := false
 
 
 func _ready() -> void:
+	add_child(sfx)
 	_rng.seed = int(Params.val("world", "seed"))
 	Highscores.load_all()
 	lives = int(Params.val("score", "start_lives"))
@@ -76,12 +81,14 @@ func _tick(dt: float) -> void:
 		State.NAME_ENTRY:
 			_update_view()
 	_refresh_overlay()
+	_update_audio()
 
 
 # --- Spielzustaende ---------------------------------------------------------
 
 func _to_title() -> void:
 	state = State.TITLE
+	sfx.play("fanfare")
 	_clear_hostiles()
 	wave_pause_left = 0.0
 	world.restore_pads()
@@ -109,6 +116,7 @@ func _add_score(points: int) -> void:
 		extra_life_given = true
 		lives += 1
 		toast_left = 2.5
+		sfx.play("extra")
 
 
 func _end_game() -> void:
@@ -125,14 +133,37 @@ func _after_game_over() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if state == State.NAME_ENTRY and event is InputEventKey and event.pressed and not event.echo:
-		_name_key(event.keycode)
+	if event is InputEventKey and event.pressed and not event.echo:
+		if state == State.NAME_ENTRY:
+			_name_key(event.keycode)
+		elif event.keycode == KEY_C:
+			crt.visible = not crt.visible
+
+
+## Dauerklaenge je nach Zustand: Triebwerk wird lauter, je naeher ein Gegner
+## kommt (wie im Original); Alarm bei wenig Treibstoff; Ratschen beim Tanken.
+func _update_audio() -> void:
+	var playing := state == State.PLAYING and jet.alive
+	var db := -28.0
+	var pitch := 0.8
+	if playing and not jet.landed:
+		var nearest := 1.0e9
+		for e in enemies:
+			nearest = minf(nearest, absf(Wrap.dx(e.center_x(), jet.center_x())))
+		var closeness := clampf(1.0 - nearest / 700.0, 0.0, 1.0)
+		db = lerpf(-20.0, -4.0, closeness)
+		pitch = 0.85 + 0.25 * closeness + 0.1 * absf(jet.vx) / Params.val("jet", "max_speed")
+	sfx.set_loop("engine", playing, db, pitch)
+	sfx.set_loop("alarm", playing and not jet.landed and jet.fuel < Params.val("jet", "fuel_low"), -10.0)
+	sfx.set_loop("refuel", playing and jet.landed and not _service_done, -12.0)
 
 
 func _name_key(keycode: int) -> void:
 	if keycode >= KEY_A and keycode <= KEY_Z:
 		if entry_name.length() < Highscores.NAME_LENGTH:
 			entry_name += char(keycode)
+			var semitones := [0, 2, 4, 5, 7, 9, 11]
+			sfx.play("beep", pow(2.0, semitones[keycode % 7] / 12.0))
 	elif keycode == KEY_BACKSPACE:
 		entry_name = entry_name.left(maxi(entry_name.length() - 1, 0))
 	elif (keycode == KEY_ENTER or keycode == KEY_KP_ENTER) and not entry_name.is_empty():
@@ -147,14 +178,15 @@ func _refresh_overlay() -> void:
 		State.TITLE:
 			l.append({"t": "FALCON PATROL", "y": 22, "s": 3, "c": white})
 			l.append({"t": "REMAKE", "y": 44, "s": 2, "c": C64.YELLOW})
-			l.append({"t": "HIGH SCORES", "y": 66, "s": 1, "c": C64.LIGHT_GREY})
+			l.append({"t": "HIGH SCORES", "y": 60, "s": 1, "c": C64.LIGHT_GREY})
 			if Highscores.entries.is_empty():
-				l.append({"t": "NO SCORES YET", "y": 76, "s": 1, "c": C64.GREY})
+				l.append({"t": "NO SCORES YET", "y": 70, "s": 1, "c": C64.GREY})
 			for i in Highscores.entries.size():
 				var e: Dictionary = Highscores.entries[i]
-				l.append({"t": "%d %s %05d" % [i + 1, e["name"], e["score"]], "y": 76 + i * 8, "s": 1, "c": white})
-			l.append({"t": "PRESS SPACE TO START", "y": 120, "s": 1, "c": C64.LIGHT_GREEN, "blink": true})
-			l.append({"t": "ARROWS FLY  SPACE FIRE  P PAUSE", "y": 130, "s": 1, "c": C64.GREY})
+				l.append({"t": "%d %s %05d" % [i + 1, e["name"], e["score"]], "y": 70 + i * 8, "s": 1, "c": white})
+			l.append({"t": "PRESS SPACE TO START", "y": 112, "s": 1, "c": C64.LIGHT_GREEN, "blink": true})
+			l.append({"t": "ARROWS FLY  SPACE FIRE", "y": 122, "s": 1, "c": C64.GREY})
+			l.append({"t": "P PAUSE  C SCANLINES", "y": 130, "s": 1, "c": C64.GREY})
 		State.PAUSED:
 			l.append({"t": "PAUSED", "y": 70, "s": 2, "c": white})
 		State.GAME_OVER:
@@ -181,7 +213,12 @@ func _step(dt: float) -> void:
 			_try_fire()
 		_check_jet_ground()
 		if jet.alive and jet.landed:
-			jet.service(dt)
+			var full := jet.service(dt)
+			if full and not _service_done:
+				sfx.play("standby")
+			_service_done = full
+		else:
+			_service_done = false
 	elif respawn_left > 0.0:
 		respawn_left -= dt
 		if respawn_left <= 0.0:
@@ -215,6 +252,7 @@ func _try_fire() -> bool:
 	add_child(m)
 	missiles.append(m)
 	jet.ammo -= 1
+	sfx.play("shot", _rng.randf_range(0.95, 1.05))
 	return true
 
 
@@ -255,6 +293,7 @@ func _maybe_bomb(e: Enemy) -> void:
 	b.vx = e.dir * speed
 	add_child(b)
 	debris.append(b)
+	sfx.play("bomb_drop")
 
 
 func _step_debris(dt: float) -> void:
@@ -342,6 +381,7 @@ func _kill_enemy(e: Enemy, by_missile: bool) -> void:
 
 func _crash_jet() -> void:
 	_explode(jet.center_x(), jet.center_y(), true)
+	sfx.play("crash")
 	jet.alive = false
 	jet.visible = false
 	lives -= 1
@@ -430,6 +470,7 @@ func _step_wave(dt: float) -> void:
 # --- Effekte und Darstellung --------------------------------------------------
 
 func _explode(wx: float, wy: float, big: bool) -> void:
+	sfx.play("explosion_big" if big else "explosion", _rng.randf_range(0.92, 1.08))
 	var x := Explosion.new()
 	x.setup(wx, wy, big)
 	add_child(x)
@@ -488,6 +529,14 @@ func _selftest() -> void:
 			_tick(1.0 / 60.0)
 	var fuel_max := Params.val("jet", "fuel_max")
 	var ground := Params.val("screen", "ground_y")
+	var sounds_ok := true
+	for n in Sfx.SOUNDS:
+		sounds_ok = sounds_ok and sfx.has_sound(n)
+	check.call(sounds_ok, "Alle Soundeffekte geladen")
+	sfx.set_loop("engine", true, -10.0, 1.0)
+	check.call(sfx.is_loop_on("engine"), "Dauerklang laesst sich einschalten")
+	sfx.set_loop("engine", false)
+	check.call(not sfx.is_loop_on("engine"), "Dauerklang laesst sich ausschalten")
 	Highscores.path = "user://selftest_scores.json"
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(Highscores.path))
 	Highscores.load_all()

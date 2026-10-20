@@ -17,6 +17,7 @@ godot --path .
 | Pfeil hoch/runter | Steigen und Sinken (Hoehe bleibt ohne Gegenschub erhalten) |
 | Leertaste | Rakete feuern (Titelbild: Spiel starten) |
 | P oder Esc | Pause |
+| C | Scanlines (CRT-Effekt) ein/aus |
 
 Landen: im Stand ueber einem intakten Flugplatz aufsetzen, dann wird getankt und
 aufmunitioniert. Abheben mit "hoch".
@@ -24,7 +25,8 @@ aufmunitioniert. Abheben mit "hoch".
 ## Entwicklung
 
 - Gameplay-Werte: `data/params.json` (alle Zahlen sind Schaetzungen, siehe ORIGINAL-RULES.md)
-- Sprites: Text-Pixelkarten in `tools/sprites/*.txt`, daraus per `python3 tools/make_sprites.py` PNGs
+- Sprites: Text-Pixelkarten in `tools/sprites/*.txt` (Buchstaben = C64-Farben), daraus per `python3 tools/make_sprites.py` PNGs
+- Sounds: `python3 tools/make_sounds.py` synthetisiert alle WAVs nach `assets/audio/`; Lautstaerken in `scripts/sfx.gd` und `_update_audio()` in `scripts/main.gd`
 - Selbsttest: `godot --headless --path . --quit-after 3000 -- --selftest` (Ausgabe `SELFTEST OK`)
 - Testlauf mit Eingabeskript und Frame-Ausgabe:
   `godot --path . --write-movie /tmp/frames/f.png --fixed-fps 60 --quit-after 400 -- --autoplay`
