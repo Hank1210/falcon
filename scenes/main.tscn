@@ -1,0 +1,17 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/main.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/world.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/jet.gd" id="3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/jet.png" id="4"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1")
+
+[node name="World" type="Node2D" parent="."]
+script = ExtResource("2")
+
+[node name="Jet" type="Sprite2D" parent="."]
+texture = ExtResource("4")
+centered = false
+script = ExtResource("3")
