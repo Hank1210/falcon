@@ -188,9 +188,11 @@ func _onoff(on: bool) -> String:
 
 func _refresh_overlay() -> void:
 	var l: Array[Dictionary] = []
+	var panel := Rect2()
 	var white := C64.WHITE
 	match state:
 		State.TITLE:
+			panel = Rect2(24, 8, 272, 140)
 			l.append({"t": "FALCON PATROL", "y": 22, "s": 3, "c": white})
 			l.append({"t": "REMAKE", "y": 44, "s": 2, "c": C64.YELLOW})
 			l.append({"t": "HIGH SCORES", "y": 60, "s": 1, "c": C64.LIGHT_GREY})
@@ -204,12 +206,15 @@ func _refresh_overlay() -> void:
 			l.append({"t": "C SCANLINES %s   T SKIP REFUEL %s" % [_onoff(crt.visible), _onoff(Settings.skip_refuel)], "y": 128, "s": 1, "c": C64.GREY})
 			l.append({"t": "F FULLSCREEN", "y": 136, "s": 1, "c": C64.GREY})
 		State.PAUSED:
+			panel = Rect2(60, 50, 200, 50)
 			l.append({"t": "PAUSED", "y": 62, "s": 2, "c": white})
 			l.append({"t": "T SKIP REFUEL %s" % _onoff(Settings.skip_refuel), "y": 84, "s": 1, "c": C64.GREY})
 		State.GAME_OVER:
+			panel = Rect2(60, 46, 200, 60)
 			l.append({"t": "GAME OVER", "y": 60, "s": 2, "c": C64.LIGHT_RED})
 			l.append({"t": "SCORE %05d" % score, "y": 82, "s": 1, "c": white})
 		State.NAME_ENTRY:
+			panel = Rect2(40, 30, 240, 104)
 			l.append({"t": "NEW HIGH SCORE", "y": 40, "s": 2, "c": C64.YELLOW})
 			l.append({"t": "SCORE %05d" % score, "y": 62, "s": 1, "c": white})
 			l.append({"t": "ENTER YOUR NAME", "y": 80, "s": 1, "c": C64.LIGHT_GREY})
@@ -220,7 +225,7 @@ func _refresh_overlay() -> void:
 				l.append({"t": "EXTRA JET", "y": 36, "s": 1, "c": C64.YELLOW})
 			if jet.alive and jet.landed and jet.locked:
 				l.append({"t": "REFUELLING", "y": 56, "s": 1, "c": C64.LIGHT_GREEN, "blink": true})
-	overlay.set_lines(l)
+	overlay.set_lines(l, panel)
 
 
 func _step(dt: float) -> void:
@@ -265,7 +270,7 @@ func _try_fire() -> bool:
 	m.vx = dir * Params.val("jet", "missile_speed")
 	m.life = Params.val("jet", "missile_life")
 	m.world_x = jet.world_x + (JET_TEXTURE.get_width() if dir > 0 else -Missile.WIDTH)
-	m.position.y = jet.position.y + 3.0
+	m.position.y = jet.position.y + JET_TEXTURE.get_height() * 0.5 - 0.5
 	add_child(m)
 	missiles.append(m)
 	jet.ammo -= 1
@@ -280,6 +285,10 @@ func _step_missiles(dt: float) -> void:
 			m.queue_free()
 
 
+func _bomb_release_y(e: Enemy) -> float:
+	return e.position.y + JET_TEXTURE.get_height()
+
+
 ## Gegner werfen Bomben so, dass sie (mit Vorhalt) auf einen intakten
 ## Flugplatz oder den Spieler fallen.
 func _maybe_bomb(e: Enemy) -> void:
@@ -287,7 +296,7 @@ func _maybe_bomb(e: Enemy) -> void:
 		return
 	var g := Params.val("enemy", "bomb_gravity")
 	var speed := Params.val("enemy", "speed")
-	var from_y := e.position.y + 6.0
+	var from_y := _bomb_release_y(e)
 	var fall := Params.val("screen", "ground_y") - from_y
 	var drop := false
 	if fall > 12.0:
@@ -458,7 +467,7 @@ func _spawn_wave() -> void:
 	for i in _wave_size(wave):
 		var side := 1 if i % 2 == 0 else -1
 		var wx := fposmod(jet.world_x + side * (dist + i * 80.0), Params.val("world", "width"))
-		var y := _rng.randf_range(Params.val("screen", "sky_top") + 10.0, Params.val("screen", "ground_y") - 40.0)
+		var y := _rng.randf_range(Params.val("screen", "sky_top") + 8.0, Params.val("screen", "ground_y") - 30.0)
 		_spawn_enemy(wx, y, -side)
 
 
@@ -522,19 +531,18 @@ func _place(node: Node2D, wx: float) -> void:
 
 func _update_view() -> void:
 	world.cam_x = jet.camera_x()
-	world.jet_world_x = jet.world_x
+	world.jet_center_x = jet.center_x()
 	world.jet_vx = jet.vx
 	world.jet_max_speed = Params.val("jet", "max_speed")
 	world.score = score
 	world.hiscore = maxi(Highscores.best(), score)
 	world.lives = maxi(lives, 0)
 	world.ammo = jet.ammo
-	world.ammo_max = int(Params.val("jet", "ammo_max"))
 	world.fuel = jet.fuel
 	world.fuel_max = Params.val("jet", "fuel_max")
 	world.radar_enemies.clear()
 	for e in enemies:
-		world.radar_enemies.append(e.center_x())
+		world.radar_enemies.append(Vector2(e.center_x(), e.center_y()))
 	world.queue_redraw()
 	for e in enemies:
 		_place(e, e.world_x)
@@ -615,7 +623,10 @@ func _selftest() -> void:
 	var target := _spawn_enemy(jet.world_x + 90.0, jet.position.y - 2.0, 1)
 	target.target_y = target.position.y
 	check.call(_try_fire(), "Jet darf feuern")
-	run.call(1.0)
+	for i in 90:
+		_tick(1.0 / 60.0)
+		if enemies.is_empty():
+			break
 	check.call(enemies.is_empty() and score == int(Params.val("score", "points_last")), "Rakete trifft, letzter Gegner gibt %d Punkte (ist %d)" % [Params.val("score", "points_last"), score])
 	check.call(wave == base_wave + 1 and wave_pause_left > 0.0, "Welle vorbei: naechste Welle plus Pause")
 	check.call(debris.size() >= 1 and debris[0].kind == Debris.Kind.WRECK, "Abgeschossener Gegner faellt als Wrack")
@@ -627,7 +638,7 @@ func _selftest() -> void:
 	jet.visible = true
 	jet.landed = false
 	jet.engine_out = false
-	jet.position.y = 100.0
+	jet.position.y = 40.0
 	jet.vx = 0.0
 	jet.vy = 0.0
 	jet.fuel = 50.0
@@ -706,7 +717,7 @@ func _selftest() -> void:
 	attacker.hunting_jet = false
 	attacker.aim_error = 0.0
 	attacker.pad_anchor_x = world.pad_center(p3)
-	var fall := ground - (attacker.position.y + 6.0)
+	var fall := ground - _bomb_release_y(attacker)
 	var lead := Params.val("enemy", "speed") * sqrt(2.0 * fall / Params.val("enemy", "bomb_gravity"))
 	attacker.world_x = fposmod(world.pad_center(p3) - lead - 8.0, Params.val("world", "width"))
 	var before := debris.size()
@@ -756,7 +767,7 @@ func _selftest() -> void:
 	jet.locked = false
 	jet.landed = false
 	jet.fuel = 50.0
-	jet.position.y = 100.0
+	jet.position.y = 40.0
 	state = State.PAUSED
 	run.call(0.5)
 	check.call(is_equal_approx(jet.fuel, 50.0), "Pause: Treibstoff bleibt stehen")

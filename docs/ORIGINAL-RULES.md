@@ -66,6 +66,18 @@ Eckdaten: Entwickler und Musiker Steve Lee, Publisher Virgin Games, 1983. Nachfo
 - Kurze, heroische Trompeten-Titelmelodie.
 - Die Community lobt vor allem die Sound-Effekte, die Grafik gilt als zweckmäßig.
 
+## Bildschirmaufbau (aus vier Screenshots des Longplays, 2026-10-20)
+- **Oben ca. 45 % Himmel**, hellblau (C64 Light Blue). Darunter der **Horizont** als graue Linie.
+- **Flugplaetze liegen am Horizont**: weisser Streifen mit Fensterreihe. Der Jet landet auf Hoehe des Horizonts.
+- **Unterhalb des Horizonts eine Bodenflaeche in Schraegansicht** (Draufsicht): gelb, graue Strassen (eine Hauptstrasse mit weisser Mittellinie, schraege Querstrassen), weisse Gebaeude mit braunen Daechern (teils mehrstoeckig), Palmen, braune Oeltanks (gruppiert), braune Lkw (parkend), schwarze Lkw auf der Strasse.
+- **Eigener Jet dunkelblau, Gegner braunrot**, beide ca. 22x9 px (in 320x200). Der Jet bleibt **in der Bildmitte** (horizontal), die Welt scrollt.
+- Kleine Raketen als kurze Striche (weiss, teils braun).
+- **HUD** unten in drei Feldern auf gruenem Grund:
+  - links: SCORE (cyan) mit 5 Ziffern (weiss), HI mit 5 Ziffern (blau), daneben ein cyanfarbenes Jet-Symbol mit der **Anzahl der Leben als Zahl**;
+  - Mitte: **Radar** (schwarz, oben schwarz mit weissen Punkten fuer Gegner und Flugplaetze, unten gelber Streifen), **auf den Spieler zentriert**, senkrechte weisse Linie in der Mitte;
+  - rechts: **GAS** (Balken, rotbraun) und **AAM** mit **Zahl, Start 100** (Beispiele 100, 097, 088; nach dem Landen wieder 100).
+- Der Rand des Bildschirms ist gruen.
+
 ## Zu verifizieren (Emulator oder Video)
 Folgende Punkte sind nicht belegt und müssen vor M2/M3 am Original (VICE oder Longplay) abgelesen werden:
 1. Anzahl der Raketen pro Betankung und ob mehrere Schüsse gleichzeitig fliegen dürfen.

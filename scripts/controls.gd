@@ -13,11 +13,7 @@ static func _seconds() -> float:
 static func horizontal() -> int:
 	if _autoplay:
 		var t := _seconds()
-		if t < 3.0:
-			return 1
-		if t < 6.0:
-			return -1
-		return 0
+		return 1 if t >= 12.5 and t < 15.0 else 0
 	return int(Input.is_physical_key_pressed(KEY_RIGHT)) - int(Input.is_physical_key_pressed(KEY_LEFT))
 
 
@@ -25,11 +21,7 @@ static func horizontal() -> int:
 static func vertical() -> int:
 	if _autoplay:
 		var t := _seconds()
-		if t >= 1.0 and t < 1.6:
-			return -1
-		if t >= 2.0 and t < 2.6:
-			return 1
-		return 0
+		return -1 if t >= 12.0 and t < 12.6 else 0
 	return int(Input.is_physical_key_pressed(KEY_DOWN)) - int(Input.is_physical_key_pressed(KEY_UP))
 
 

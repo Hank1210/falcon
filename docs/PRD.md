@@ -2,7 +2,7 @@
 
 Status: Entwurf v0.1 · Datum: 2026-10-20
 
-**Fortschritt:** M0 bis M6 sind umgesetzt (M6: Export noch offen, Vorlagen fehlen) (Spielkern, Landen und Tanken, Bomben, Wellen, Titelbild, Game Over, Highscore, Pause, synthetisierte Sounds, Pixel-Grafik, Scanlines). Offen: Export der Mac-App; Klang und Optik sind noch nicht am Original abgeglichen. Messwerte aus dem Original stehen noch aus (siehe ORIGINAL-RULES.md).
+**Fortschritt:** M0 bis M6 sind umgesetzt (M6: Export noch offen, Vorlagen fehlen) (Spielkern, Landen und Tanken, Bomben, Wellen, Titelbild, Game Over, Highscore, Pause, synthetisierte Sounds, Pixel-Grafik, Scanlines). Offen: Export der Mac-App; Optik und Layout sind an Screenshots des Originals angepasst (siehe ORIGINAL-RULES.md); Klang ist noch nicht abgeglichen. Messwerte aus dem Original stehen noch aus (siehe ORIGINAL-RULES.md).
 
 ## 1. Ziel und Vision
 

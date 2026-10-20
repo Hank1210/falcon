@@ -25,6 +25,7 @@ var _bottom: float
 
 func _ready() -> void:
 	centered = false
+	modulate = C64.BLUE
 	_world_w = Params.val("world", "width")
 	_top = Params.val("screen", "sky_top")
 	_bottom = Params.val("screen", "ground_y") - texture.get_height()
