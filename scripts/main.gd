@@ -637,7 +637,7 @@ func _selftest() -> void:
 	var under := world.pad_index_at(jet.center_x())
 	var side_bomb := Debris.new()
 	side_bomb.world_x = jet.center_x() + 16.0
-	side_bomb.position.y = ground - 6.0
+	side_bomb.position.y = ground - 3.9
 	add_child(side_bomb)
 	debris.append(side_bomb)
 	lives_before = lives
