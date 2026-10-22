@@ -51,7 +51,7 @@
 		"spawn_distance": 500.0,
 		"wave_size": 2,
 		"wave_pause": 4.0,
-		"bomb_cooldown": 2.2,
+		"bomb_cooldown": 3.2,
 		"bomb_gravity": 140.0,
 		"wreck_gravity": 120.0,
 		"wave_timeout": 40.0,
@@ -59,11 +59,11 @@
 		"wave_pause_min": 2.0,
 		"wave_pause_step": 0.4,
 		"first_wave_delay": 8.0,
-		"pad_attack_chance": 0.5,
+		"pad_attack_chance": 0.3,
 		"waves_per_step": 6,
 		"max_wave_size": 4,
 		"leave_distance": 600.0,
-		"bomb_aim_error": 35.0,
+		"bomb_aim_error": 80.0,
 		"first_wave_delay_skip": 6.0
 	},
 	"score": {
