@@ -18,7 +18,7 @@ godot --path . --resolution 1280x800 --write-movie /tmp/f/f.png --fixed-fps 60 -
 - Es gibt keinen Linter und kein Test-Framework; der **Selbsttest** (`_selftest()` am Ende von `scripts/main.gd`) ist der einzige Test. Einzelne Faelle laufen nicht getrennt: neue Checks werden dort in die Sequenz eingefuegt (`check.call(bool, "Beschreibung")`, `run.call(sekunden)` fuer Spielzeit). Das Ergebnis ist der Exit-Code plus `SELFTEST OK`/`SELFTEST FEHLER: ...`. Immer `--quit-after` mitgeben, sonst kann ein Skriptfehler den Prozess haengen lassen (Exit-Code 0 trotz Fehler: auf `SCRIPT ERROR`/fehlendes `SELFTEST OK` pruefen).
 - Neue `class_name`-Skripte sind erst nach `--import` bekannt (sonst "Could not find type ...").
 - `--autoplay` ersetzt die Tastatur durch ein festes Skript in `scripts/controls.gd` (Start nach 5 Frames, Abheben bei 12 s). Mit `--write-movie` entstehen PNG-Frames, die man mit dem Read-Tool ansehen kann.
-- Export (macOS): `godot --headless --path . --export-release "macOS" build/FalconPatrolRemake.app`. Braucht die Godot-Export-Vorlagen 4.7.2 (~1,3 GB, aktuell nicht installiert). `export_presets.cfg` muss `data/*.json` im `include_filter` behalten, sonst fehlt `params.json` in der App.
+- Export (macOS): Vorlagen 4.7.2 sind installiert. Nicht direkt nach `build/` exportieren (liegt unter `~/Documents`, Signierung scheitert an Finder-Attributen), sondern ausserhalb exportieren und mit `ditto --noextattr --norsrc` kopieren (Befehle in `README.md`). `export_presets.cfg` muss `data/*.json` im `include_filter` behalten, sonst fehlt `params.json` in der App. Die Binary heisst `Falcon Patrol Remake` (mit Leerzeichen).
 
 ## Architektur
 

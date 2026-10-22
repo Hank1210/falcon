@@ -41,12 +41,19 @@ gezeichnet (`Art.SCALE = 0.5`), die 5x7-Schrift wird beim Start geglaettet (`scr
 
 ## Export (macOS)
 
-Voraussetzung: Export-Vorlagen fuer Godot 4.7.2 (im Editor: Editor > Export-Vorlagen verwalten > Herunterladen).
+Voraussetzung: Export-Vorlagen fuer Godot 4.7.2 (Editor > Export-Vorlagen verwalten, oder
+`Godot_v4.7.2-stable_export_templates.tpz` von GitHub nach `~/Library/Application Support/Godot/export_templates/4.7.2.stable/` entpacken).
+
+Das Signieren scheitert, wenn die App direkt in einem Ordner unter `~/Documents` entsteht (macOS haengt
+Finder-Attribute an). Daher ausserhalb exportieren und mit `ditto` ins Projekt kopieren:
 
 ```bash
-godot --headless --path . --export-release "macOS" build/FalconPatrolRemake.app
+godot --headless --path . --export-release "macOS" /tmp/export/FalconPatrolRemake.app
+ditto --noextattr --norsrc /tmp/export/FalconPatrolRemake.app build/FalconPatrolRemake.app
+codesign -v build/FalconPatrolRemake.app   # muss ohne Ausgabe durchlaufen
 ```
 
-Die App ist nur ad-hoc signiert (privater Gebrauch). Beim ersten Start auf einem anderen Mac:
-Rechtsklick > Oeffnen. Hinweis: JSON-Dateien aus `data/` muessen im Export enthalten sein
-(`include_filter` in `export_presets.cfg`).
+Die App (ca. 160 MB) ist nur ad-hoc signiert (privater Gebrauch). Beim ersten Start auf einem anderen Mac:
+Rechtsklick > Oeffnen. JSON-Dateien aus `data/` muessen im Export enthalten sein (`include_filter` in
+`export_presets.cfg`). Der Selbsttest laeuft auch in der exportierten App:
+`"build/FalconPatrolRemake.app/Contents/MacOS/Falcon Patrol Remake" --headless --quit-after 3000 -- --selftest`.
