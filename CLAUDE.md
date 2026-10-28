@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Privates Remake des C64-Spiels *Falcon Patrol* (Virgin Games, 1983) in Godot 4.7 / GDScript. Sprache in Code-Kommentaren, Docs und Commit-Nachrichten: Deutsch. Ziel ist moeglichst grosse Originaltreue; spaetere Veroeffentlichung ist denkbar, daher nur eigene Assets (nichts aus dem Original uebernehmen) und eigener Titel.
+Privates Remake des C64-Spiels *Falcon Patrol* (Virgin Games, 1983) in Godot 4.7 / GDScript. Sprache in Code-Kommentaren, Docs und Commit-Nachrichten: Deutsch. Ziel ist moeglichst grosse Originaltreue. Der Quelltext ist oeffentlich (GitHub `Hank1210/falcon`), aber nur fuer private Nutzung; es werden keine fertigen Builds bereitgestellt (`build/` bleibt in `.gitignore`, keine Binaries committen). Nur eigene Assets (nichts aus dem Original uebernehmen); der Titel "Falcon Patrol Remake" bleibt bestehen.
 
 ## Befehle
 
