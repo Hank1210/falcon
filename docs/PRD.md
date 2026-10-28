@@ -20,8 +20,9 @@ Ein spielbarer Nachbau des C64-Klassikers *Falcon Patrol* (ca. 1983/84), einem h
 
 - Spielmechanik und Idee sind frei nachbaubar. Original-Grafiken, Sounds, Code und evtl. der Name sind geschützt.
 - **Alle Assets werden neu erstellt** (eigene Pixel-Grafik, eigene Sounds).
-- Bei Veröffentlichung: eigener Titel (Arbeitstitel: „Falcon Patrol Remake"), Hinweis auf Hommage.
-- Für den rein privaten Gebrauch gilt dasselbe als sichere Linie.
+- Der Quelltext ist öffentlich einsehbar (GitHub-Repository `falcon`), aber **nur für private, nicht-kommerzielle Nutzung** gedacht. Es wird keine Lizenz zur Weiterverbreitung vergeben (siehe README, Abschnitt „Hinweise zur Nutzung“).
+- **Keine kompilierten Builds:** Es werden keine fertigen Apps oder Binaries bereitgestellt (weder im Repository noch als Download). Wer das Spiel spielen will, erzeugt den Build selbst aus dem Quelltext (README, Abschnitt „Export“).
+- Das Projekt ist eine Hommage und nicht mit den Rechteinhabern von *Falcon Patrol* verbunden. Der Titel „Falcon Patrol Remake“ bleibt bewusst bestehen, weil kein Produkt vertrieben wird.
 
 ## 4. Umfang (Scope)
 
@@ -82,7 +83,7 @@ Jede Stufe endet mit einem lauffähigen, testbaren Stand.
 | **M3 Inhalt** | Flugplätze mit Landen und Auftanken, Treibstoff, Bomben der Gegner, Radar, Wellen-System (2/3/4 Jets, kürzere Pausen) | Kompletter Spielkreislauf: Welle, Landen, Auftanken, nächste Welle | 1 Tag |
 | **M4 Spielfluss** | Titelbild, HUD, 3 Leben und Extra-Leben bei 3.000, Tank-Sequenz, Game Over, Highscore, Pause | Kompletter Spieldurchlauf von Start bis Game Over | 0,5–1 Tag |
 | **M5 Sound und Look** | Eigene Pixel-Grafik, SFX, Musik, optional CRT-Effekt | Wirkt wie ein Retro-Spiel, nicht wie ein Prototyp | 1 Tag |
-| **M6 Feinschliff und Release** | Balancing, Bugfixes, Optionen (F15), Build/Export, ggf. Veröffentlichung | Release-Build läuft auf Zielplattform | 1 Tag |
+| **M6 Feinschliff und Release** | Balancing, Bugfixes, Optionen (F15), Build/Export, Quelltext-Veröffentlichung (ohne fertige Builds) | Selbst erzeugter Build läuft auf Zielplattform | 1 Tag |
 | **M7 Optional** | Mehr Level/Bosse, Online-Highscore, weitere Plattformen | nach Bedarf | offen |
 
 Die Aufwände sind Schätzungen für Entwicklung mit KI-Unterstützung. Gesamt etwa 5–6 Tage bis M6.
@@ -93,7 +94,7 @@ Die Aufwände sind Schätzungen für Entwicklung mit KI-Unterstützung. Gesamt e
 |---|---|---|
 | Quellen liefern keine Messwerte (Tempo, Trägheit, Treibstoff, Raketenzahl) | Spielgefühl weicht ab | Werte im VICE-Emulator oder Longplay ablesen, als Config halten und nachjustieren |
 | Spielgefühl (Trägheit, Tempo) schwer zu treffen | Steuerung wirkt falsch | Früh in M1/M2 testen, Parameter in einer Config |
-| Urheberrecht an Assets | Veröffentlichung nicht möglich | Nur eigene Assets, eigener Titel |
+| Urheberrecht an Assets | Veröffentlichung des Quelltexts problematisch | Nur eigene Assets, nur private Nutzung, keine fertigen Builds |
 | Engine-Wahl später bereut | Teilweise Neuarbeit | Spiellogik und Daten (Wellen) engine-unabhängig dokumentieren |
 | Godot-Web-Build ist groß | Langsame Ladezeit | Bei Web-Fokus Canvas-Variante wählen |
 
@@ -101,7 +102,7 @@ Die Aufwände sind Schätzungen für Entwicklung mit KI-Unterstützung. Gesamt e
 
 ### Entschieden
 - **Engine:** Godot 4.x mit GDScript. Entwicklung mit VS Code (Erweiterung godot-tools) und dem Godot-Editor für Szenen und Test.
-- **Verbreitung:** Zunächst rein privat. Später Modifikation und Veröffentlichung möglich. Deshalb von Anfang an nur eigene Assets, Original-Code und Original-Sounds werden nicht verwendet.
+- **Verbreitung:** Der Quelltext wird öffentlich bereitgestellt, die Nutzung ist aber auf den privaten Gebrauch beschränkt. Es gibt keine vorkompilierten Builds; wer spielen will, baut selbst. Von Anfang an nur eigene Assets, Original-Code und Original-Sounds werden nicht verwendet.
 - **Originaltreue:** So originalgetreu wie möglich bei Regeln, Tempo, Gegnern und Spielgefühl. Modernisierungen (Pause, Gamepad, Optionen) nur als abschaltbare Extras.
 - **Konsequenz:** Die Gameplay-Parameter (Geschwindigkeiten, Trägheit, Wellentabellen, Punkte) liegen in Konfigurationsdateien, damit spätere Modifikationen leicht möglich sind.
 
@@ -110,11 +111,11 @@ Die Aufwände sind Schätzungen für Entwicklung mit KI-Unterstützung. Gesamt e
 - **Assets:** Sprites werden als Text-Pixelkarten (C64-Palette) im Projekt definiert und per Skript in PNGs umgewandelt. Sounds werden per Skript synthetisiert (Rechteck/Rauschen, SID-ähnlich). Keine externen Tools oder API-Zugänge nötig.
 
 - **Godot:** 4.7.2 installiert.
+- **Titel:** „Falcon Patrol Remake“ bleibt auch für das öffentliche Repository bestehen.
 - **Projektordner:** `/Users/FRE_1/Documents/projects-2/falcon-remake` (Git, Branch `main`).
 
 ### Offen
-1. **Titel:** Arbeitstitel „Falcon Patrol Remake". Für eine spätere Veröffentlichung ist ein eigener Name nötig.
-2. **Messwerte des Originals** (siehe ORIGINAL-RULES.md, „Zu verifizieren“): Ist VICE vorhanden, oder soll ich anhand des Longplay-Videos schätzen?
+1. **Messwerte des Originals** (siehe ORIGINAL-RULES.md, „Zu verifizieren“): Ist VICE vorhanden, oder soll ich anhand des Longplay-Videos schätzen?
 
 ## 10. Nächste Schritte
 

@@ -91,4 +91,4 @@ Folgende Punkte sind nicht belegt und müssen vor M2/M3 am Original (VICE oder L
 ## Hinweise zur Modifikation und Veröffentlichung
 - Der Wiki-Eintrag und die Reviews nennen **schwache Kollisionsabfrage** und **ruckeliges Scrolling** als Mängel. Für Originaltreue als Option (`classic_mode`) umsetzbar, standardmäßig besser: saubere Kollision und flüssiges Scrolling.
 - Die lange Tank-Sequenz zu Beginn jedes Lebens ist ein oft kritisierter Punkt. Als Option „Tank-Sequenz überspringen“ vorsehen.
-- Es gibt ein bekanntes Windows-Remake („Patrol Falcon“, 2007). Für eine spätere Veröffentlichung sollte das Remake eigene Grafik, eigene Sounds und einen eigenen Titel haben.
+- Es gibt ein bekanntes Windows-Remake („Patrol Falcon“, 2007). Das Remake verwendet daher ausschließlich eigene Grafik und eigene Sounds; der Quelltext ist nur zur privaten Nutzung gedacht, fertige Builds werden nicht verteilt.
