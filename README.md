@@ -6,9 +6,24 @@ Planung und Originalregeln: [docs/PRD.md](docs/PRD.md), [docs/ORIGINAL-RULES.md]
 <img width="1068" height="669" alt="Bildschirmfoto 2026-10-28 um 21 55 19" src="https://github.com/user-attachments/assets/7306d0fd-0fdc-40bd-9b63-d4ef6d6fc9d0" />
 
 
+## Hinweise zur Nutzung
+
+- **Nur private Nutzung.** Dieses Projekt ist ein nicht-kommerzielles Fan-Remake zum Lernen und Ausprobieren.
+  Weitergabe, Veroeffentlichung von Builds, kommerzielle Nutzung und der Vertrieb in App-Stores sind nicht gestattet.
+  Mit dem Quelltext ist keine Lizenz zur Weiterverbreitung verbunden.
+- **Keine fertige App.** Es werden bewusst keine kompilierten Versionen (`.app`, `.exe`, Binaries) bereitgestellt.
+  Wer das Spiel spielen will, muss es selbst aus dem Quelltext bauen oder direkt mit Godot starten
+  (siehe "Starten" und "Export" unten).
+- **Eigene Assets.** Sprites, Schrift und Sounds sind selbst erzeugt (`tools/`); aus dem Original wurde nichts uebernommen.
+  *Falcon Patrol* gehoert den jeweiligen Rechteinhabern; dieses Projekt ist nicht mit ihnen verbunden oder von ihnen autorisiert.
+- Bereitstellung ohne Gewaehrleistung, auf eigene Gefahr.
+
 ## Starten
 
+Voraussetzung: [Godot 4.7](https://godotengine.org/) und Python 3 (nur zum Neuerzeugen der Assets). Die erzeugten Sprites und Sounds liegen bereits im Repo.
+
 ```bash
+godot --headless --path . --import   # einmalig, importiert die Assets
 godot --path .
 ```
 
@@ -42,9 +57,9 @@ gezeichnet (`Art.SCALE = 0.5`), die 5x7-Schrift wird beim Start geglaettet (`scr
 - Testlauf mit Eingabeskript und Frame-Ausgabe:
   `godot --path . --write-movie /tmp/frames/f.png --fixed-fps 60 --quit-after 400 -- --autoplay`
 
-## Export (macOS)
+## Export (macOS) - eigenen Build erzeugen
 
-Voraussetzung: Export-Vorlagen fuer Godot 4.7.2 (Editor > Export-Vorlagen verwalten, oder
+Es gibt keine vorkompilierte App zum Download; der Build ist selbst zu erzeugen. Voraussetzung: Export-Vorlagen fuer Godot 4.7.2 (Editor > Export-Vorlagen verwalten, oder
 `Godot_v4.7.2-stable_export_templates.tpz` von GitHub nach `~/Library/Application Support/Godot/export_templates/4.7.2.stable/` entpacken).
 
 Das Signieren scheitert, wenn die App direkt in einem Ordner unter `~/Documents` entsteht (macOS haengt
