@@ -3,6 +3,9 @@
 Privates Remake des C64-Klassikers *Falcon Patrol* (Virgin Games, 1983) in Godot 4.7.
 Planung und Originalregeln: [docs/PRD.md](docs/PRD.md), [docs/ORIGINAL-RULES.md](docs/ORIGINAL-RULES.md).
 
+<img width="1068" height="669" alt="Bildschirmfoto 2026-10-28 um 21 55 19" src="https://github.com/user-attachments/assets/7306d0fd-0fdc-40bd-9b63-d4ef6d6fc9d0" />
+
+
 ## Starten
 
 ```bash
